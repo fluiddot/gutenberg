@@ -279,6 +279,7 @@ class BottomSheet extends Component {
 			isVisible,
 			leftButton,
 			rightButton,
+			header,
 			hideHeader,
 			style = {},
 			contentStyle = {},
@@ -355,21 +356,24 @@ class BottomSheet extends Component {
 
 		const WrapperView = isChildrenScrollable ? View : ScrollView;
 
-		const getHeader = () => (
-			<>
-				<View style={ styles.bottomSheetHeader }>
-					<View style={ styles.flex }>{ leftButton }</View>
-					<Text
-						style={ bottomSheetHeaderTitleStyle }
-						maxFontSizeMultiplier={ 3 }
-					>
-						{ title }
-					</Text>
-					<View style={ styles.flex }>{ rightButton }</View>
-				</View>
-				{ withHeaderSeparator && <View style={ styles.separator } /> }
-			</>
-		);
+		const getHeader = () =>
+			header || (
+				<>
+					<View style={ styles.bottomSheetHeader }>
+						<View style={ styles.flex }>{ leftButton }</View>
+						<Text
+							style={ bottomSheetHeaderTitleStyle }
+							maxFontSizeMultiplier={ 3 }
+						>
+							{ title }
+						</Text>
+						<View style={ styles.flex }>{ rightButton }</View>
+					</View>
+					{ withHeaderSeparator && (
+						<View style={ styles.separator } />
+					) }
+				</>
+			);
 
 		return (
 			<Modal
