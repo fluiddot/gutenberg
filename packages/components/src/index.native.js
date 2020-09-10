@@ -76,6 +76,7 @@ export { default as Gradient } from './mobile/gradient';
 export { default as ColorSettings } from './mobile/color-settings';
 export { LinkPicker } from './mobile/link-picker';
 export { default as LinkSettings } from './mobile/link-settings';
+export { default as SegmentedControl } from './mobile/segmented-control';
 export { default as Image, IMAGE_DEFAULT_FOCAL_POINT } from './mobile/image';
 export { default as ImageEditingButton } from './mobile/image/image-editing-button';
 
