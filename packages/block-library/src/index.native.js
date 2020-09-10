@@ -221,6 +221,7 @@ export const registerCoreBlocks = () => {
 		socialLink,
 		socialLinks,
 		pullquote,
+		reusableBlock,
 	].forEach( registerBlock );
 
 	registerBlockVariations( socialLink );
