@@ -111,9 +111,7 @@ export default compose( [
 		const {
 			__experimentalGetReusableBlock: getReusableBlock,
 			__experimentalIsFetchingReusableBlock: isFetchingReusableBlock,
-			__experimentalIsSavingReusableBlock: isSavingReusableBlock,
 		} = select( 'core/editor' );
-		const { canUser } = select( 'core' );
 		const { __experimentalGetParsedReusableBlock, getSettings } = select(
 			'core/block-editor'
 		);
@@ -123,33 +121,17 @@ export default compose( [
 		return {
 			reusableBlock,
 			isFetching: isFetchingReusableBlock( ref ),
-			isSaving: isSavingReusableBlock( ref ),
-			blocks: reusableBlock
-				? __experimentalGetParsedReusableBlock( reusableBlock.id )
-				: null,
-			canUpdateBlock:
-				!! reusableBlock &&
-				! reusableBlock.isTemporary &&
-				!! canUser( 'update', 'blocks', ref ),
 			settings: getSettings(),
 		};
 	} ),
 	withDispatch( ( dispatch, ownProps ) => {
 		const {
-			__experimentalConvertBlockToStatic: convertBlockToStatic,
 			__experimentalFetchReusableBlocks: fetchReusableBlocks,
-			__experimentalUpdateReusableBlock: updateReusableBlock,
-			__experimentalSaveReusableBlock: saveReusableBlock,
 		} = dispatch( 'core/editor' );
 		const { ref } = ownProps.attributes;
 
 		return {
 			fetchReusableBlock: partial( fetchReusableBlocks, ref ),
-			onChange: partial( updateReusableBlock, ref ),
-			onSave: partial( saveReusableBlock, ref ),
-			convertToStatic() {
-				convertBlockToStatic( ownProps.clientId );
-			},
 		};
 	} ),
 ] )( ReusableBlockEdit );
