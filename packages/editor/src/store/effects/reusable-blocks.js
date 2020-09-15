@@ -19,6 +19,7 @@ import { __ } from '@wordpress/i18n';
 // refactoring editor actions to yielded controls, or replacing direct dispatch
 // on the editor store with action creators (e.g. `REMOVE_REUSABLE_BLOCK`).
 import { dispatch as dataDispatch, select } from '@wordpress/data';
+import { Platform } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -61,8 +62,13 @@ export const fetchReusableBlocks = async ( action, store ) => {
 				} ),
 			];
 		} else {
+			const perPage = Platform.select( {
+				// Unbounded queries don't work on native so we can only fetch the maximum items for now
+				native: 100,
+				web: -1,
+			} );
 			posts = await apiFetch( {
-				path: `/wp/v2/${ postType.rest_base }?per_page=-1`,
+				path: `/wp/v2/${ postType.rest_base }?per_page=${ perPage }`,
 			} );
 		}
 
