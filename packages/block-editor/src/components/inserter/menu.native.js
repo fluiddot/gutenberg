@@ -32,30 +32,22 @@ import {
 /**
  * Internal dependencies
  */
+import BlocksTab from './blocks-tab';
+import ReusableBlocksTab from './reusable-blocks-tab';
 import styles from './style.scss';
-import MenuItem from './menu-item.native';
 
-const MIN_COL_NUM = 3;
-const TABS = [ __( 'Child Blocks' ), __( 'Reusable blocks' ) ];
+const TABS = [ __( 'Blocks' ), __( 'Reusable' ) ];
 
 export class InserterMenu extends Component {
 	constructor() {
 		super( ...arguments );
 
 		this.onClose = this.onClose.bind( this );
-		this.onLayout = this.onLayout.bind( this );
 		this.onChangeTab = this.onChangeTab.bind( this );
-		this.renderItem = this.renderItem.bind( this );
-		this.renderBlocksTab = this.renderBlocksTab.bind( this );
-		this.renderReusableBlocksTab = this.renderReusableBlocksTab.bind(
-			this
-		);
+		this.renderTabs = this.renderTabs.bind( this );
 		this.state = {
-			numberOfColumns: MIN_COL_NUM,
 			tab: 0,
 		};
-
-		Dimensions.addEventListener( 'change', this.onLayout );
 	}
 
 	componentDidMount() {
@@ -65,45 +57,6 @@ export class InserterMenu extends Component {
 
 	componentWillUnmount() {
 		this.props.hideInsertionPoint();
-		Dimensions.removeEventListener( 'change', this.onLayout );
-	}
-
-	calculateMinItemWidth( bottomSheetWidth ) {
-		const { paddingLeft, paddingRight } = styles.columnPadding;
-		return (
-			( bottomSheetWidth - 2 * ( paddingLeft + paddingRight ) ) /
-			MIN_COL_NUM
-		);
-	}
-
-	calculateItemWidth() {
-		const {
-			paddingLeft: itemPaddingLeft,
-			paddingRight: itemPaddingRight,
-		} = styles.modalItem;
-		const { width: itemWidth } = styles.modalIconWrapper;
-		return itemWidth + itemPaddingLeft + itemPaddingRight;
-	}
-
-	calculateColumnsProperties() {
-		const bottomSheetWidth = BottomSheet.getWidth();
-		const { paddingLeft, paddingRight } = styles.columnPadding;
-		const itemTotalWidth = this.calculateItemWidth();
-		const containerTotalWidth =
-			bottomSheetWidth - ( paddingLeft + paddingRight );
-		const numofColumns = Math.floor( containerTotalWidth / itemTotalWidth );
-
-		if ( numofColumns < MIN_COL_NUM ) {
-			return {
-				numOfColumns: MIN_COL_NUM,
-				itemWidth: this.calculateMinItemWidth( bottomSheetWidth ),
-				maxWidth: containerTotalWidth / MIN_COL_NUM,
-			};
-		}
-		return {
-			numOfColumns: numofColumns,
-			maxWidth: containerTotalWidth / numofColumns,
-		};
 	}
 
 	onClose() {
@@ -115,85 +68,32 @@ export class InserterMenu extends Component {
 		this.props.onDismiss();
 	}
 
-	onLayout() {
-		const {
-			numOfColumns,
-			itemWidth,
-			maxWidth,
-		} = this.calculateColumnsProperties();
-		const numberOfColumns = numOfColumns;
-
-		this.setState( { numberOfColumns, itemWidth, maxWidth } );
-	}
-
 	onChangeTab( tab ) {
 		this.setState( { tab: TABS.indexOf( tab ) } );
 	}
 
-	renderItem( { item } ) {
-		const { itemWidth, maxWidth } = this.state;
-		const { onSelect } = this.props;
-		return (
-			<MenuItem
-				item={ item }
-				itemWidth={ itemWidth }
-				maxWidth={ maxWidth }
-				onSelect={ onSelect }
-			/>
-		);
-	}
+	renderTabs( { listProps } ) {
+		const { onSelect, destinationRootClientId } = this.props;
+		const { tab } = this.state;
 
-	renderBlocksTab( listProps ) {
-		const { blockItems } = this.props;
-		const { numberOfColumns } = this.state;
+		const tabProps = {
+			rootClientId: destinationRootClientId,
+			onSelect,
+			listProps,
+		};
 
-		return (
-			<FlatList
-				onLayout={ this.onLayout }
-				key={ `InserterUI-Blocks-${ numberOfColumns }` } //re-render when numberOfColumns changes
-				keyboardShouldPersistTaps="always"
-				numColumns={ numberOfColumns }
-				data={ blockItems }
-				ItemSeparatorComponent={ () => (
-					<TouchableWithoutFeedback accessible={ false }>
-						<View style={ styles.rowSeparator } />
-					</TouchableWithoutFeedback>
-				) }
-				keyExtractor={ ( item ) => item.name }
-				renderItem={ this.renderItem }
-				{ ...listProps }
-			/>
-		);
-	}
-
-	renderReusableBlocksTab( listProps ) {
-		const { reusableBlockItems } = this.props;
-		const { numberOfColumns } = this.state;
-
-		return (
-			<FlatList
-				onLayout={ this.onLayout }
-				key={ `InserterUI-ReusableBlocks-${ numberOfColumns }` } //re-render when numberOfColumns changes
-				keyboardShouldPersistTaps="always"
-				numColumns={ numberOfColumns }
-				data={ reusableBlockItems }
-				ItemSeparatorComponent={ () => (
-					<TouchableWithoutFeedback accessible={ false }>
-						<View style={ styles.rowSeparator } />
-					</TouchableWithoutFeedback>
-				) }
-				keyExtractor={ ( item ) => item.name }
-				renderItem={ this.renderItem }
-				{ ...listProps }
-			/>
-		);
+		switch ( tab ) {
+			case 0:
+				return <BlocksTab { ...tabProps } />;
+			case 1:
+				return <ReusableBlocksTab { ...tabProps } />;
+		}
 	}
 
 	render() {
-		const { reusableBlockItems } = this.props;
-		const { numberOfColumns, tab } = this.state;
+		const { hasReusableBlocks } = this.props;
 
-		const hideHeader = reusableBlockItems.length === 0;
+		const hideHeader = ! hasReusableBlocks;
 
 		return (
 			<BottomSheet
@@ -211,16 +111,7 @@ export class InserterMenu extends Component {
 			>
 				<TouchableHighlight accessible={ false }>
 					<BottomSheetConsumer>
-						{ ( { listProps } ) => {
-							switch ( tab ) {
-								case 0:
-									return this.renderBlocksTab( listProps );
-								case 1:
-									return this.renderReusableBlocksTab(
-										listProps
-									);
-							}
-						} }
+						{ this.renderTabs }
 					</BottomSheetConsumer>
 				</TouchableHighlight>
 			</BottomSheet>
@@ -231,15 +122,12 @@ export class InserterMenu extends Component {
 export default compose(
 	withSelect( ( select, { clientId, isAppender, rootClientId } ) => {
 		const {
-			getInserterItems,
 			getBlockName,
 			getBlockRootClientId,
 			getBlockSelectionEnd,
 			getSettings,
-			canInsertBlockType,
 		} = select( 'core/block-editor' );
-		const { getChildBlockNames, getBlockType } = select( 'core/blocks' );
-		const { getClipboard } = select( 'core/editor' );
+		const { getChildBlockNames } = select( 'core/blocks' );
 
 		let destinationRootClientId = rootClientId;
 		if ( ! destinationRootClientId && ! clientId && ! isAppender ) {
@@ -255,40 +143,14 @@ export default compose(
 
 		const {
 			__experimentalShouldInsertAtTheTop: shouldInsertAtTheTop,
+			__experimentalReusableBlocks: reusableBlocks,
+			__experimentalFetchReusableBlocks: fetchReusableBlocks,
 		} = getSettings();
-		const clipboard = getClipboard();
-		const clipboardBlock =
-			clipboard && rawHandler( { HTML: clipboard } )[ 0 ];
-		const shouldAddClipboardBlock =
-			clipboardBlock &&
-			canInsertBlockType( clipboardBlock.name, destinationRootClientId );
-
-		const allItems = getInserterItems( destinationRootClientId );
-		const blockItems = allItems.filter(
-			( { name } ) => name !== 'core/block'
-		);
-		const blockItemsWithClipboard = shouldAddClipboardBlock
-			? [
-					{
-						...pick( getBlockType( clipboardBlock.name ), [
-							'name',
-							'icon',
-						] ),
-						id: 'clipboard',
-						initialAttributes: clipboardBlock.attributes,
-						innerBlocks: clipboardBlock.innerBlocks,
-					},
-					...blockItems,
-			  ]
-			: blockItems;
-		const reusableBlockItems = allItems.filter(
-			( { name } ) => name === 'core/block'
-		);
 
 		return {
 			rootChildBlocks: getChildBlockNames( destinationRootBlockName ),
-			blockItems: blockItemsWithClipboard,
-			reusableBlockItems,
+			fetchReusableBlocks,
+			hasReusableBlocks: !! reusableBlocks?.length,
 			destinationRootClientId,
 			shouldInsertAtTheTop,
 		};
@@ -303,12 +165,8 @@ export default compose(
 			insertBlock,
 			insertDefaultBlock,
 		} = dispatch( 'core/block-editor' );
-		const {
-			__experimentalFetchReusableBlocks: fetchReusableBlocks,
-		} = dispatch( 'core/editor' );
 
 		return {
-			fetchReusableBlocks,
 			showInsertionPoint() {
 				if ( ownProps.shouldReplaceBlock ) {
 					const { getBlockOrder, getBlockCount } = select(
