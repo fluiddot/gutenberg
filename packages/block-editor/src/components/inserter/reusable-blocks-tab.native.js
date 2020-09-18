@@ -19,12 +19,12 @@ function ReusableBlocksTab( { onSelect, rootClientId, listProps } ) {
 			);
 			const { __experimentalFetchReusableBlocks } = getSettings();
 			const allItems = getInserterItems( rootClientId );
-			const items = allItems.filter(
+			const reusableBlockItems = allItems.filter(
 				( { category } ) => category === REUSABLE_BLOCKS_CATEGORY
 			);
 
 			return {
-				items,
+				items: reusableBlockItems,
 				fetchReusableBlocks: __experimentalFetchReusableBlocks,
 			};
 		},

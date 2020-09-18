@@ -19,11 +19,9 @@ const NON_BLOCK_CATEGORIES = [ 'reusable' ];
 function BlocksTab( { onSelect, rootClientId, listProps } ) {
 	const { items } = useSelect(
 		( select ) => {
-			const {
-				getInserterItems,
-				getSettings,
-				canInsertBlockType,
-			} = select( 'core/block-editor' );
+			const { getInserterItems, canInsertBlockType } = select(
+				'core/block-editor'
+			);
 			const { getBlockType } = select( 'core/blocks' );
 			const { getClipboard } = select( 'core/editor' );
 
@@ -35,11 +33,11 @@ function BlocksTab( { onSelect, rootClientId, listProps } ) {
 				canInsertBlockType( clipboardBlock.name, rootClientId );
 
 			const allItems = getInserterItems( rootClientId );
-			const items = allItems.filter(
+			const blockItems = allItems.filter(
 				( { category } ) => ! NON_BLOCK_CATEGORIES.includes( category )
 			);
 
-			const itemsWithClipboard = shouldAddClipboardBlock
+			const blockItemsWithClipboard = shouldAddClipboardBlock
 				? [
 						{
 							...pick( getBlockType( clipboardBlock.name ), [
@@ -50,11 +48,11 @@ function BlocksTab( { onSelect, rootClientId, listProps } ) {
 							initialAttributes: clipboardBlock.attributes,
 							innerBlocks: clipboardBlock.innerBlocks,
 						},
-						...items,
+						...blockItems,
 				  ]
-				: items;
+				: blockItems;
 
-			return { items: itemsWithClipboard };
+			return { items: blockItemsWithClipboard };
 		},
 		[ rootClientId ]
 	);

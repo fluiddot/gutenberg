@@ -112,9 +112,7 @@ export default compose( [
 			__experimentalGetReusableBlock: getReusableBlock,
 			__experimentalIsFetchingReusableBlock: isFetchingReusableBlock,
 		} = select( 'core/editor' );
-		const { __experimentalGetParsedReusableBlock, getSettings } = select(
-			'core/block-editor'
-		);
+		const { getSettings } = select( 'core/block-editor' );
 		const { ref } = ownProps.attributes;
 		const reusableBlock = getReusableBlock( ref );
 

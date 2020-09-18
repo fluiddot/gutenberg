@@ -6,21 +6,13 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import {
-	FlatList,
-	View,
-	TouchableHighlight,
-	TouchableWithoutFeedback,
-	Dimensions,
-	Text,
-} from 'react-native';
-import { pick } from 'lodash';
+import { TouchableHighlight } from 'react-native';
 
 /**
  * WordPress dependencies
  */
-import { Component, render } from '@wordpress/element';
-import { createBlock, rawHandler } from '@wordpress/blocks';
+import { Component } from '@wordpress/element';
+import { createBlock } from '@wordpress/blocks';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { withInstanceId, compose } from '@wordpress/compose';
 import {
