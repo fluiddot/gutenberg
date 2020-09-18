@@ -7,28 +7,19 @@ import { partial } from 'lodash';
  * WordPress dependencies
  */
 import { Component } from '@wordpress/element';
-import {
-	Placeholder,
-	Spinner,
-	Disabled,
-	ToolbarButton,
-	ToolbarGroup,
-} from '@wordpress/components';
+import { Disabled } from '@wordpress/components';
 import { withSelect, withDispatch } from '@wordpress/data';
-import { __ } from '@wordpress/i18n';
-import {
-	BlockControls,
-	BlockEditorProvider,
-	BlockList,
-	WritingFlow,
-} from '@wordpress/block-editor';
+import { BlockEditorProvider } from '@wordpress/block-editor';
 import { compose } from '@wordpress/compose';
 import { parse, serialize } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
-import ReusableBlockEditPanel from './edit-panel';
+import EditLoading from './edit-loading';
+import EditUnavailable from './edit-unavailable';
+import EditElement from './edit-element';
+import EditContainer from './edit-container';
 
 class ReusableBlockEdit extends Component {
 	constructor( { reusableBlock } ) {
@@ -123,19 +114,11 @@ class ReusableBlockEdit extends Component {
 		const { isEditing, title, blocks } = this.state;
 
 		if ( ! reusableBlock && isFetching ) {
-			return (
-				<Placeholder>
-					<Spinner />
-				</Placeholder>
-			);
+			return <EditLoading />;
 		}
 
 		if ( ! reusableBlock ) {
-			return (
-				<Placeholder>
-					{ __( 'Block has been deleted or is unavailable.' ) }
-				</Placeholder>
-			);
+			return <EditUnavailable />;
 		}
 
 		let element = (
@@ -145,9 +128,7 @@ class ReusableBlockEdit extends Component {
 				onChange={ this.setBlocks }
 				onInput={ this.setBlocks }
 			>
-				<WritingFlow>
-					<BlockList />
-				</WritingFlow>
+				<EditElement />
 			</BlockEditorProvider>
 		);
 
@@ -156,32 +137,21 @@ class ReusableBlockEdit extends Component {
 		}
 
 		return (
-			<>
-				<BlockControls>
-					<ToolbarGroup>
-						<ToolbarButton onClick={ convertToStatic }>
-							{ __( 'Convert to regular blocks' ) }
-						</ToolbarButton>
-					</ToolbarGroup>
-				</BlockControls>
-				<div className="block-library-block__reusable-block-container">
-					{ ( isSelected || isEditing ) && (
-						<ReusableBlockEditPanel
-							isEditing={ isEditing }
-							title={
-								title !== null ? title : reusableBlock.title
-							}
-							isSaving={ isSaving && ! reusableBlock.isTemporary }
-							isEditDisabled={ ! canUpdateBlock }
-							onEdit={ this.startEditing }
-							onChangeTitle={ this.setTitle }
-							onSave={ this.save }
-							onCancel={ this.stopEditing }
-						/>
-					) }
-					{ element }
-				</div>
-			</>
+			<EditContainer
+				isEditing={ isEditing }
+				title={ title }
+				startEditing={ this.startEditing }
+				setTitle={ this.setTitle }
+				save={ this.save }
+				stopEditing={ this.stopEditing }
+				convertToStatic={ convertToStatic }
+				isSelected={ isSelected }
+				reusableBlock={ reusableBlock }
+				isSaving={ isSaving }
+				canUpdateBlock={ canUpdateBlock }
+			>
+				{ element }
+			</EditContainer>
 		);
 	}
 }
