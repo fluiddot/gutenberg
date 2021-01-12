@@ -18,6 +18,19 @@ class GutenbergViewController: UIViewController {
     fileprivate var contentInfo: ContentInfo?
     private var unsupportedBlockCanBeActivated = false
     private var unsupportedBlockEnabled = true
+    
+    private lazy var fetchMocks: Array<Dictionary<String, AnyObject>> = {
+        guard let path = Bundle.main.path(forResource: "fetchMocks", ofType: "json") else {
+            return []
+        }
+        
+        do {
+            let data = try Data(contentsOf: URL(fileURLWithPath: path), options: .mappedIfSafe)
+            return try JSONSerialization.jsonObject(with: data, options: .mutableLeaves) as? Array<Dictionary<String, AnyObject>> ?? []
+        } catch {
+            return []
+        }
+    }()
 
     override func loadView() {
         view = gutenberg.rootView
@@ -53,7 +66,10 @@ class GutenbergViewController: UIViewController {
 
 extension GutenbergViewController: GutenbergBridgeDelegate {
     func gutenbergDidRequestFetch(path: String, completion: @escaping (Result<Any, NSError>) -> Void) {
-        completion(Result.success([:]))
+        let fetchMock = fetchMocks.first { path.starts(with: $0["path"] as? String ?? "") }
+        let response = fetchMock?["response"] as? Dictionary<String, AnyObject> ?? [:]
+        
+        completion(Result.success(response))
     }
 
     func editorDidAutosave() {
