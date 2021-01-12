@@ -9,6 +9,7 @@ import { I18nManager } from 'react-native';
 import './globals';
 import { getTranslation } from '../i18n-cache';
 import initialHtml from './initial-html';
+import initialEntities from './initial-entities';
 import setupApiFetch from './api-fetch-setup';
 
 /**
@@ -18,6 +19,7 @@ import {
 	validateThemeColors,
 	validateThemeGradients,
 } from '@wordpress/block-editor';
+import { dispatch } from '@wordpress/data';
 
 const reactNativeSetup = () => {
 	// Disable warnings as they disrupt the user experience in dev mode
@@ -57,6 +59,21 @@ const setupInitHooks = () => {
 			setupLocale( props.locale, props.translations );
 		}
 	);
+
+	wpHooks.addAction( 'native.render', 'gutenberg-mobile', ( props ) => {
+		if ( props.isDemo ) {
+			// Add initial entities data
+			setImmediate( () => {
+				initialEntities.forEach( ( { kind, name, records } ) => {
+					dispatch( 'core' ).receiveEntityRecords(
+						kind,
+						name,
+						records
+					);
+				} );
+			} );
+		}
+	} );
 
 	// Map native props to Editor props
 	// TODO: normalize props in the bridge (So we don't have to map initialData to initialHtml)
