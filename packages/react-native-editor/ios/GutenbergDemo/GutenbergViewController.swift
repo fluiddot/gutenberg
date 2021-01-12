@@ -274,6 +274,10 @@ extension GutenbergViewController: GutenbergBridgeDataSource {
     var isPreview: Bool {
         return false
     }
+    
+    var isDemo: Bool {
+        return true
+    }
 
     func gutenbergLocale() -> String? {
         return Locale.preferredLanguages.first ?? "en"

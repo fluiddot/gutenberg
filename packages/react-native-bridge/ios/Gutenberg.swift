@@ -97,6 +97,7 @@ public class Gutenberg: NSObject {
         }
 
         initialProps["editorMode"] = dataSource.isPreview ? "preview" : "editor"
+        initialProps["isDemo"] = dataSource.isDemo
 
         return initialProps
     }

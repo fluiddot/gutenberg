@@ -96,6 +96,7 @@ const setupInitHooks = () => {
 				colors,
 				gradients,
 				editorMode: props.editorMode,
+				isDemo: props.isDemo,
 			};
 		}
 	);
